@@ -1,3 +1,3 @@
 motionarm-arduino
 =================
-This file is for arduino
+This file is for motionarm
