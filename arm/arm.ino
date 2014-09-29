@@ -1,6 +1,7 @@
 #include <Servo.h>
 
-#define DEBUG    0
+#define DEBUG           0
+#define FILTER_COUNT    5
 
 int numdata[6] = {0};
 String comdata = "";
@@ -10,10 +11,19 @@ Servo myservo2;
 Servo myservo3;
 
 int mark = 0;
+
 int val0 = 0;
 int val1 = 0;
 int val2 = 0;
 int val3 = 0;
+
+int last_val0 = 0;
+int last_val1 = 0;
+int last_val2 = 0;
+int last_val3 = 0;
+
+int val_interval = 0;
+int loop_count = 0;
 
 void setup()
 {
@@ -22,7 +32,7 @@ void setup()
     myservo2.attach(4);    //Vertical
     myservo3.attach(5);    //Front and back
     
-    Serial.begin(9600);
+    Serial.begin(57600);
     myservo0.write(15);
     delay(15);
     myservo1.write(0);
@@ -33,7 +43,8 @@ void setup()
 void loop()
 {
     //reset
-    delay(50);
+    delay(10);
+    
     int j = 0;            // output range of X or Y movement; affects movement sp
     comdata = "";
     mark = 0;
@@ -96,19 +107,76 @@ void loop()
 
         if(val0 <= 180)
         {
+            if(abs(val0 - last_val0) >= FILTER_COUNT) {
+                val_interval = (val0 - last_val0) / FILTER_COUNT;
+                loop_count = FILTER_COUNT;
+            } else {
+                val_interval = 1;
+                loop_count = abs(val0 - last_val0);
+            }
+            
+            //Move to the place fluently
+            for(int i = 1; i < loop_count; i++) {
+                myservo0.write(last_val0 + (val_interval * i));
+            }
+            
             myservo0.write(val0);
+            
+            last_val0 = val0;
         }
         if(val1 <= 180)
         {
+            if(abs(val1 - last_val1) >= FILTER_COUNT) {
+                val_interval = (val1 - last_val1) / FILTER_COUNT;
+                loop_count = FILTER_COUNT;
+            } else {
+                val_interval = 1;
+                loop_count = abs(val1 - last_val1);
+            }
+            
+            for(int i = 1; i < loop_count; i++) {
+                myservo1.write(last_val1 + (val_interval * i));
+            }
+            
             myservo1.write(val1);
+            
+            last_val1 = val1;
         }
         if(val2 <= 180)
         {
+            if(abs(val2 - last_val2) >= FILTER_COUNT) {
+                val_interval = (val2 - last_val2) / FILTER_COUNT;
+                loop_count = FILTER_COUNT;
+            } else {
+                val_interval = 1;
+                loop_count = abs(val2 - last_val2);
+            }
+            
+            for(int i = 1; i < loop_count; i++) {
+                myservo2.write(last_val2 + (val_interval * i));
+            }
+            
             myservo2.write(val2);
+            
+            last_val2 = val2;
         }
         if(val3 <= 180)
         {
+            if(abs(val3 - last_val3) >= FILTER_COUNT) {
+                val_interval = (val3 - last_val3) / FILTER_COUNT;
+                loop_count = FILTER_COUNT;
+            } else {
+                val_interval = 1;
+                loop_count = abs(val3 - last_val3);
+            }
+            
+            for(int i = 1; i < loop_count; i++) {
+                myservo3.write(last_val3 + (val_interval * i));
+            }
+            
             myservo3.write(val3);
+            
+            last_val3 = val3;
         }
     }
     delay(10);
